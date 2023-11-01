@@ -1,0 +1,88 @@
+---
+title: "2023_league_analysis"
+format: html
+editor: visual
+---
+
+## National Friends Fantasy Football Team League Analysis
+
+<!-- Read in Packages -->
+```{r}
+library(tidyverse)
+library(here)
+library(ggplot2)
+library(paletteer)
+```
+
+<!-- Read in data -->
+```{r}
+# read in data
+data = read_csv(here("data/league_data_2023.csv"))
+# print
+head(data)
+
+# read in matchup data
+matchups = read_csv(here("data/league_matchups_2023.csv"))
+# print
+head(matchups)
+```
+
+## Basic Graphs
+
+
+```{r}
+
+data |> 
+    group_by(TeamName, Week) |> 
+    filter(PlayerRosterSlot != "Bench") |> 
+    summarize(weekly_score = sum(PlayerScoreActual)) |> 
+    ggplot(aes(x=Week, y = weekly_score, color = TeamName)) +
+    geom_line(size=1) +
+    xlim(1,8)  +
+    ylim(50,180) +
+    # change colors and add percent to y axis
+    scale_colour_manual(values = paletteer_d("ggprism::colors", 12)) +
+    labs(
+        x = "Week",
+        y = "Weekly Score",
+        color = "Team",
+        title = "Weekly Score for Every Team"
+    )
+
+
+```
+
+
+```{r}
+
+data %>%
+  group_by(TeamName, Week) %>%
+  filter(PlayerRosterSlot != "Bench") %>%
+  summarize(weekly_score = sum(PlayerScoreActual),
+            projected_weekly_score = sum(PlayerScoreProjected)) %>%
+  ggplot(aes(x = Week, y = weekly_score, color = TeamName)) +
+  geom_line(aes(linetype = "solid", show.legend = FALSE)) +
+  geom_line(aes(y = projected_weekly_score, linetype = "dashed")) +
+  facet_wrap(~ TeamName) +
+  labs(title = "Weekly Actual and Projected Scores by Team", x = "Week", y = "Scores") +
+  scale_linetype_manual(values = c("dashed", "solid"), labels = c("Projected", "Actual")) +
+  xlim(1, 8) +
+  ylim(50, 180) +
+  scale_colour_manual(values = paletteer_d("ggprism::colors", 12)) +
+  guides(color = "none", linetype = guide_legend(title = "Scores")) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    plot.title = element_text(face= "bold", hjust = 0.5),
+    legend.position = c(.90, -0.05), legend.justification = c(1, 0))
+
+```
+
+
+
+
+
+
+
+
+

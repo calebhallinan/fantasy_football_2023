@@ -19,6 +19,7 @@ league = espn.FantasyLeague(league_id=1527302859, year=2023, swid=espnsecrets.sw
 
 # get data
 data = league.get_league_data()
+
 # save data
 data.to_csv("data/league_data_2023.csv")
 

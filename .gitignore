@@ -3,3 +3,5 @@
 fantasy.Rproj
 python/espnsecrets.py
 .Rhistory
+python/deidentify_data.py
+python/__pycache__

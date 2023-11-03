@@ -24,6 +24,12 @@ knitr::opts_chunk$set(echo=TRUE, include = TRUE, warning=FALSE, message=FALSE)
 
 My friends and I are always talking about fantasy football. You may read that and think I'm kidding, but if you look at my screen time since football started the top two are 1. The Iphone Messages App because I am always messaging my friends about fantasy and 2. The ESPN Fantasy App. So no, I am not kidding. It's probably not worth it because I won't win this year anyways, but eh - it's fun and I enjoy it :)
 
+<!-- football image -->
+
+::: {style="text-align: center;"}
+![[Image Source](https://www.espn.com/fantasy/football/)](fantasy_football.png){width=600}
+:::
+
 <!-- Read in Packages -->
 ```{r}
 # Read in my package ahead of time
@@ -71,6 +77,17 @@ data = read_csv(here("data/league_data_2023_deidentified.csv"))
 
 # read in matchup data
 matchups = read_csv(here("data/league_matchups_2023_deidentified.csv"))
+# get rid of some of the data as it duplicated it
+matchups = matchups[1:65,]
+
+# NOTE: edit WEEK based on current week
+data = data |> 
+  # get rid of weeks 9-17
+  filter(!Week %in% c(9:17))
+
+matchups = matchups |> 
+  # get rid of weeks 9-17
+  filter(!Week %in% c(9:17))
 ```
 
 
@@ -84,8 +101,6 @@ matchups = read_csv(here("data/league_matchups_2023_deidentified.csv"))
 ```{r}
 
 data %>%
-    # get rid of weeks 9-17
-  filter(!Week %in% c(9:17)) |> 
   group_by(TeamName, Week) %>%
   filter(PlayerRosterSlot != "Bench") %>%
   summarize(weekly_score = sum(PlayerScoreActual),
@@ -156,47 +171,99 @@ data |>
 ```
 
 
+
+
 ```{r}
-# Finding out how each player compares to their projection
+# graph for worst loss differential
 
-# data
-data |> 
-  # get rid of weeks 9-17
-  filter(!Week %in% c(9:17)) |> 
-  mutate(difference_actual_proj = PlayerScoreActual - PlayerScoreProjected) |> 
-  arrange(difference_actual_proj) |> 
-  group_by(PlayerName) |> 
-  summarise(sum_diff = sum(difference_actual_proj)) |> 
-  arrange(desc(sum_diff))
+# grab difference of scores
+matchups_diff = matchups |> 
+    mutate(Difference = Score1 - Score2)
 
+# get team with lower score
+matchups_diff$LowerScoreName = ifelse(matchups_diff$Difference < 0, matchups_diff$Name1, matchups_diff$Name2)
 
-# data
-data |> 
-  # get rid of weeks 9-17
-  filter(!Week %in% c(9:17)) |> 
-  mutate(difference_actual_proj = PlayerScoreActual - PlayerScoreProjected) |> 
-  arrange(difference_actual_proj) |> 
-  group_by(PlayerName) |> 
-  summarise(sum_diff = sum(difference_actual_proj)) |> 
-  arrange(sum_diff)
+# get abs of difference and plot
+matchups_diff |> 
+  mutate(Difference = abs(Difference)) |> 
+  group_by(LowerScoreName) |> 
+  summarise(sum_diff = sum(Difference)) |> 
+  ggplot(aes(x = LowerScoreName, y = sum_diff, fill = LowerScoreName)) +
+    geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = paletteer_d("ggprism::colors", 12)) +
+    theme_linedraw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+    text = element_text(size = 12),
+    plot.title = element_text(face = "bold", hjust = 0.5)) +
+  labs(
+    x = "Team Name",
+    y = "Total Loss Differential",
+    title = "Total Loss Differential For Each Team",
+    fill = "Team Name"
+  ) +
+  guides(fill = "none")
 
 
 ```
 
 
-Potential plots:
-1. Show who has top 25 best and worst players
-2. Which players are most similar to their projected score
-3. Team's with worst loss differential and best
+
+```{r}
+# Points against vs weekly average
+weekly_data = data %>%
+  group_by(TeamName, Week) %>%
+  filter(PlayerRosterSlot != "Bench") %>%
+  summarize(weekly_score = sum(PlayerScoreActual),
+            projected_weekly_score = sum(PlayerScoreProjected)) 
+
+pts_against = inner_join(weekly_data, matchups, by = c("Week")) |> 
+  filter(TeamName == Name1 | TeamName == Name2)
+  
+pts_against$opponent = ifelse(pts_against$TeamName == pts_against$Name1, pts_against$Name2,pts_against$Name1)
+pts_against$opponent_score = ifelse(pts_against$TeamName == pts_against$Name1, pts_against$Score2,pts_against$Score1)
+
+
+pts_against = pts_against |> 
+  select(TeamName, Week, weekly_score, projected_weekly_score, opponent, opponent_score) |> 
+  group_by(Week) |> 
+  mutate(weekly_average = mean(weekly_score))
+
+
+ggplot(pts_against, aes(x = Week, color = TeamName)) +
+  geom_line(aes(y = opponent_score, linetype = "dashed"), color= "gray") +
+  geom_line(aes(y = weekly_average, linetype = "dotted"), color= "black") + 
+  geom_line(aes(y = weekly_score, linetype = "solid")) + 
+  facet_wrap(.~ TeamName) +
+  labs(title = "Weekly Average Score Compared to Opponents Score", x = "Week", y = "Scores") +
+  scale_linetype_manual(values = c("dashed", "dotted", "solid"), labels = c("Opponents Score", "Weekly Average", "Your Score")) +
+  scale_colour_manual(values = paletteer_d("ggprism::colors", 12)) +
+    guides(color = "none", linetype = guide_legend(title = "Scores")) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    plot.title = element_text(face= "bold", hjust = 0.5),
+    legend.position = c(.73, -.025), legend.justification = c(1, 0))
+
+```
+
+
+
+<!-- Potential plots: -->
+<!-- 1. Show who has top 25 best and worst players -->
+<!-- 2. Which players are most similar to their projected score -->
+<!-- 3. Team's with worst loss differential and best -->
 
 
 
 Resources:
+
 - https://jman4190.medium.com/analyzing-your-fantasy-football-season-with-python-8c228262eae9
+
 - https://github.com/tbryan2/espnfantasyfootball
+
 - https://stmorse.github.io/journal/espn-fantasy-projections.html
 
-
+- https://www.espn.com/fantasy/football/
 
 
 
@@ -284,3 +351,26 @@ data |>
 
 ```
 
+
+
+```{r, include=FALSE}
+# Finding out how each player compares to their projection
+
+# data
+data |> 
+  mutate(difference_actual_proj = PlayerScoreActual - PlayerScoreProjected) |> 
+  arrange(difference_actual_proj) |> 
+  group_by(PlayerName) |> 
+  summarise(sum_diff = sum(difference_actual_proj)) |> 
+  arrange(desc(sum_diff))
+
+
+# data
+data |> 
+  mutate(difference_actual_proj = PlayerScoreActual - PlayerScoreProjected) |> 
+  arrange(difference_actual_proj) |> 
+  group_by(PlayerName) |> 
+  summarise(sum_diff = sum(difference_actual_proj)) |> 
+  arrange(sum_diff)
+
+```

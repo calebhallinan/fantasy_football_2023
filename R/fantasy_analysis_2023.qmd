@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo=TRUE, include = TRUE, warning=FALSE, message=FALSE)
 
 ## Brief Introduction
 
-My friends and I are [always]{.underline} talking about fantasy football. You may read that and think I'm kidding, but if you look at my phone screen time since football season started the top two are 1. The Iphone Messages App because I am messaging my friends about fantasy and 2. The ESPN Fantasy App. So no, I am not kidding. It's probably not worth it because I won't win this year anyways, but eh - it's fun and I enjoy it :)
+My friends and I are [always]{.underline} talking about fantasy football. You may read that and think I'm kidding, but if you look at my phone screen time since football season started the top two are 1. The ESPN Fantasy App and 2. The IPhone Messages App because I am messaging my friends about fantasy. So no, I am not kidding. It's probably not worth it because I won't win this year anyways, but eh - it's fun and I enjoy it :)
 
 <!-- football image -->
 
@@ -34,7 +34,7 @@ My friends and I are [always]{.underline} talking about fantasy football. You ma
 
 ::: {.callout-important}
 
-Fantasy Football can and will likely become addicting if you play, so fair warning to those who have never played before 😅
+Fantasy Football can and will likely become addicting if you play, so fair warning to those who have never played before and are interested 😅
 
 :::
 
@@ -51,26 +51,25 @@ library(stringr)
 
 ## The Questions and Data
 
-With this being said, I wanted to do a more in depth analysis of some fantasy football statistics so far this year. I did some research and found two awesome blog posts that help me get started on reading in data and interesting graphs to make @jman4190medium @stimsonspage. So, I wanted to answer questions like:
+With this being said, I wanted to do a more in depth analysis of some fantasy football statistics so far this year. I did some research and found two awesome blog posts that helped get me started on reading in data and interesting graphs to make @jman4190medium @stimsonspage. The goal was to answer questions like:
 
-How accurate are your weekly projections?
+1. How accurate are your weekly projections?
+2. What teams are under or over performing each week compared to others?
+3. Where do most of the points come from for each team?
 
-How have the top picked players performed compared to what they were expected?
+My hope is to add more to this analysis as time goes on, so let me know if you have a question you are interested in!
 
-Are there any fantasy sleepers so far? (i.e. football players who are outperforming themselves, players who people like me didn't think would perform well)
 
-??? More!
-
-I have a two main audiences I want this to reach:
+I have two main audiences I want this to reach:
 
 1. My fantasy football friends
 2. Others who do fantasy football and might find my analysis interesting
 
 For those of you who may not understand fantasy football, I won't go into much depth on it so check out this [short post by ESPN](https://www.espn.com/fantasy/football/story/_/id/34389554/fantasy-football-beginners-how-play-fantasy-football-2022) that explains it @espn-fantasy-football-2022.
 
-So for the data, I decided to use my football fantasy league of this year (2023). I could have done last year for a more complete analysis of how I didn't win, but this will give all my friends things to talk about now and I can continually update the analysis each week (which seemed pretty cool to me). It turns out I am not the first person that wanted this data, so lucky for me a guy named Tim Bryan made a function to extract all the data from the website @espnfantasyfootballgithub. Click [here](https://github.com/tbryan2/espnfantasyfootball) to go to the specific repository I used from him.
+So for the data, I decided to use my football fantasy league of this year (2023). I could have done last year for a more complete analysis of how I didn't win, but this give my league things to talk about now and I can continually update the analysis each week (which seemed pretty cool to me). It turns out I am not the first person that wanted this data, so lucky for me a guy named Tim Bryan made a function to extract all the data from the website @espnfantasyfootballgithub. Click [here](https://github.com/tbryan2/espnfantasyfootball) to go to the specific repository I used from him.
 
-However, not everything worked first try and I had to make some changes to his code to load in all the data without some errors. Feel free to check [my github repo](https://github.com/calebhallinan/fantasy_football_2023) for what I did there. So, after some tweeks I was successfully able to read in and save everything I needed to a .csv file in my local directory which I then pushed to my github. Here is a data dictionary for the variables I was using:
+However, not everything worked the first try and I had to make some changes to his code to load in all the data without some errors. Feel free to check [my github repo](https://github.com/calebhallinan/fantasy_football_2023) for what I did there. So, after some tweeks I was successfully able to read in and save everything I needed to a .csv file in my local directory which I then pushed to my github. Here is a data dictionary for the variables I was using with two different datasets:
 
 
 ::: {style="font-size: 80%;"}
@@ -121,7 +120,7 @@ FLEX = Can be any position listed above
 
 :::
 
-Finally, I de-identified all the data but mine to where my friends would know who they are but no one else can identify them. This data is coming from the ESPN Fantasy Website so thank you to them for allowing us to use it @espnfantasyfootball!
+Finally, I de-identified all the data but mine to where my friends would know who they are but no one else can identify them. This data is coming from the ESPN Fantasy Website so thank you to them for allowing me to extract it @espnfantasyfootball!
 
 So now, let's go ahead and read in the data I obtained using python (on my github). I do some pre-processing to remove weeks that haven't been played yet and other columns I don't need.
 
@@ -179,7 +178,7 @@ data|>
   labs(
     title = "Weekly Actual and Projected Scores by Team", 
     x = "Week", 
-    y = "Scores (# of pts)",
+    y = "Scores",
     caption = "Data Source: ESPN Fantasy Website",
     subtitle = str_wrap("The plot reveals several interesting trends. Notably, Team BD and Team JN consistently maintain 
                         a steady average of projected points per week. Meanwhile, teams such as myself and Team BL have
@@ -257,7 +256,11 @@ ggplot(pts_against, aes(x = Week, color = TeamName)) +
     x = "Week", 
     y = "Scores",
     caption = "Data Source: ESPN Fantasy Website",
-    subtitle = str_wrap("", width = 90)) +
+    subtitle = str_wrap("There is a diverse range of teams, including consistent ones, teams with a lot of boom 
+                        potential, and teams with a lot of bust potential. Notable outliers are Team GM, who f
+                        requently scores high, and Team TP, who frequently scores low. Generally, teams tend to 
+                        score close to the average points per week, with a few teams deviating from this trend each
+                        week.", width = 90)) +
   # set custom labels for linetype
   scale_linetype_manual(values = c("dashed", "dotted", "solid"), labels = c("Opponents Score", "Weekly Average", "Your Score")) +
   # set colors for teamnames
@@ -274,10 +277,11 @@ ggplot(pts_against, aes(x = Week, color = TeamName)) +
 
 ```
 
-?????
+We see two teams, Team BD and JN, are both pretty "average" teams. However, what's interesting about that is they are currently at the top of the league in wins (Through Week 8) therefore implying consistency may be the best in winning fantasy football. Team RW has fairly low scoring weeks, besides their one breakout week 5 against Team TP. Interestingly, Team TP started off strong but had a tough middle of the season and unlucky past two weeks getting just barely beat by their opponent.
 
+A lot of these trends can be explained more by BYE weeks (weeks that a NFL team has off), injuries, or injuries that affect other players (for example, QB Matt Stafford was out Week 9 and so WR Puka Nacua didn't even score 5 points when he was projected 12). I think that is certainly the case for Team TP who has had a tough go at injuries this season. I personally have had a decent amount, like the number one overall pick Justin Jefferson being on IR and missing the past 4 weeks (note the drop in my score four weeks ago) 🙃. 
 
-
+Next, I wanted to take a look at what position performs the best for each team and where the majority of their points are coming from. Take a look below!
 
 ```{r, message=FALSE}
 # Cumulative points over time and show distribution of each place
@@ -327,15 +331,24 @@ data |>
 
 ```
 
+Unsurprisingly, RBs and WRs are the most valuable position as they score more than any other position. However, it is worth noting that there are two RB/WR slots in your lineup and only one of every other position. So, if we double a lot of team's QB points one could argue they are the most valuable and score the most points. To me, it seems like positions other than RB, WR, or QB are all relatively similar throughout teams, with only a small variation. If you begin to add more context to this plot, like the fact that Team WN had Travis Kelce (who is easily the best TE and scores a lot more points than other TEs) for the past 8 weeks you see he has a much higher TE total. This is certainly an advantage, however Team WN did use their first round pick on Travis (yes, this is the guy currently dating Taylor Swift).
+
 ::: {.column-margin}
+
 I usually never draft a QB high, with my theory being in a 10 man league there are typically enough "average" QBs to be fine. This year, I decided to draft Joe Burrow much earlier than I usually do and it has come back to bite me in the butt because he has been pitiful. So, lesson learned and I will not be drafting QBs early anymore.
 
 ![[Joe Burrow](https://www.nfl.com/players/joe-burrow/stats/career)](joe.png){width=200 style="text-align: center;"}
+
 :::
+
+
+Finally, this last graph was made solely for my friends and I so that we can laugh at the thought of who is getting wrecked this year in fantasy. Take a look below for more details 😄
+
 
 ::: {.callout-warning}
 Team TP, you might want to look away for for this one...
 :::
+
 
 ```{r}
 # graph for worst loss differential
@@ -384,11 +397,14 @@ matchups_diff |>
 
 ```
 
-Honestly, this plot was solely made so we could make fun of whoever has the worst Loss Differential, so sorry Team TP 😅
-Note: this is not counting how much you win, it is solely taking the weeks you lose and finding the differential between you and your opponent's team score.
+This plot is expressing the worst Loss Differential... so sorry Team TP 😅 It's not looking good for you! One thing to note is this is not counting how much you win, it is solely taking the weeks you lose and finding the differential between you and your opponent's team score.
+
 
 ## Final Thoughts
 
+Ultimately, I had a really fun time doing this analysis and writing this blog! Looking forward to updating the results as the weeks go on, and to see who will be my league's crowned chamption this year 🥳 
+
+To summarize a bit of what my analysis consisted of - I analyzed data from my 2023 Fantasy Football League. I found interesting trends in the weekly match-ups, such as typically when a team over-performs they will get the W (but not always) or some teams went through a rough stretch of weeks. I also showed how RBs and WRs are typically the positions that score the most points, with other positions being more team dependent (aka you have the one good TE in the league). Our league is pretty tight this year in terms of rankings, so it was hard to see that a certain trend in the data leads you to be the best team. However, I think as the weeks go on that will certainly become more clear. My goal is to do more of a statistical analysis when the season is complete in order to step up my game for next year's fantasy football season! 😄
 
 
 ## Functions Used

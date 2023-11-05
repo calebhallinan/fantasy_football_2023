@@ -1,5 +1,5 @@
 ---
-title: "Example Analysis (Fantasy Football Analysis 2023)"
+title: "Example Analysis (An Analysis on my 2023 Fantasy Football League (So Far))"
 author: "Caleb Hallinan"
 date: 11/10/2023
 format:
@@ -11,6 +11,8 @@ format:
 fontsize: 12pt
 geometry: margin=1.5in
 fontcolor: black
+bibliography: references.bib
+csl: ieee.csl
 ---
 
 <!-- Global params -->
@@ -20,7 +22,7 @@ knitr::opts_chunk$set(echo=TRUE, include = TRUE, warning=FALSE, message=FALSE)
 ```
 
 
-## An Analysis on my 2023 Fantasy Football League (So Far)
+## Brief Introduction
 
 My friends and I are [always]{.underline} talking about fantasy football. You may read that and think I'm kidding, but if you look at my phone screen time since football season started the top two are 1. The Iphone Messages App because I am messaging my friends about fantasy and 2. The ESPN Fantasy App. So no, I am not kidding. It's probably not worth it because I won't win this year anyways, but eh - it's fun and I enjoy it :)
 
@@ -28,6 +30,12 @@ My friends and I are [always]{.underline} talking about fantasy football. You ma
 
 ::: {style="text-align: center;"}
 ![[ESPN Fantasy App Logo](https://espnpressroom.com/us/press-releases/2016/08/espn-fantasy-footballs-21st-season-comprehensive-coverage-ever/)](fantasy_football.webp){width=400}
+:::
+
+::: {.callout-important}
+
+Fantasy Football can and will likely become addicting if you play, so fair warning to those who have never played before 😅
+
 :::
 
 <!-- Read in Packages -->
@@ -43,7 +51,7 @@ library(stringr)
 
 ## The Questions and Data
 
-With this being said, I wanted to do a more in depth analysis of some fantasy football statistics so far this year. I wanted to answer questions like:
+With this being said, I wanted to do a more in depth analysis of some fantasy football statistics so far this year. I did some research and found two awesome blog posts that help me get started on reading in data and interesting graphs to make @jman4190medium @stimsonspage. So, I wanted to answer questions like:
 
 How accurate are your weekly projections?
 
@@ -53,24 +61,69 @@ Are there any fantasy sleepers so far? (i.e. football players who are outperform
 
 ??? More!
 
-I have a few audiences I want this to reach:
+I have a two main audiences I want this to reach:
 
 1. My fantasy football friends
 2. Others who do fantasy football and might find my analysis interesting
-3. People who don't know fantasy football - I hope I can teach you something!
+
+For those of you who may not understand fantasy football, I won't go into much depth on it so check out this [short post by ESPN](https://www.espn.com/fantasy/football/story/_/id/34389554/fantasy-football-beginners-how-play-fantasy-football-2022) that explains it @espn-fantasy-football-2022.
+
+So for the data, I decided to use my football fantasy league of this year (2023). I could have done last year for a more complete analysis of how I didn't win, but this will give all my friends things to talk about now and I can continually update the analysis each week (which seemed pretty cool to me). It turns out I am not the first person that wanted this data, so lucky for me a guy named Tim Bryan made a function to extract all the data from the website @espnfantasyfootballgithub. Click [here](https://github.com/tbryan2/espnfantasyfootball) to go to the specific repository I used from him.
+
+However, not everything worked first try and I had to make some changes to his code to load in all the data without some errors. Feel free to check [my github repo](https://github.com/calebhallinan/fantasy_football_2023) for what I did there. So, after some tweeks I was successfully able to read in and save everything I needed to a .csv file in my local directory which I then pushed to my github. Here is a data dictionary for the variables I was using:
 
 
-So for the data, I decided to use my football fantasy league of this year (2023). I could have done last year for a more complete analysis of how I didn't win, but this will give all my friends things to talk about now and I can continually update the analysis each week (which seemed pretty cool to me). It turns out I am not the first person that wanted this data, so lucky for me a guy named Tim Bryan made a function to extract all the data from the website. Click [here](https://github.com/tbryan2/espnfantasyfootball) to go to the specific repository I used from him.
+::: {style="font-size: 80%;"}
 
-However, not everything worked first try and I had to make some changes to his code to load in all the data without some errors. Feel free to check my github for what I did there. So, after some tweeks I was successfully able to read in and save everything I needed to a .csv file in my local directory. Here is a data dictionary for the variables I was using:
+| Variable Name | Data Type | Description | Example |
+|---------|:-----|------:|:------:|
+| Week      | dbl   |    Week for each football games played |   There are 17 Weeks total   |
+| PlayerName     | chr  |   Name of football player |  Joe Burrow   |
+| PlayerScoreActual       |  dbl    | The actual points a player scored in a given week |   21.2    |
+| PlayerScoreProjected       |  dbl    | The projected points a player is to score in a given week |   19.0    |
+| PlayerRosterSlot       |  chr    | What position that player is playing in a given week |  WR    |
+| TeamName       |  chr    | The team who has a given player |   Team Caleb (me!)    |
+
+: Data Dictionary for Scoring Variables
 
 
-MAKE TABLE OF VARIABLES
+
+| Variable Name | Data Type | Description | Example |
+|---------|:-----|------:|:------:|
+| Week      | dbl   |    Week for each football games played |   There are 17 Weeks total   |
+| Name1     | chr  |   Name of team 1 |  Team Caleb (me!)   |
+| Score1       |  dbl    | The total points Name1 scored in a given week |   102.7    |
+| Name2       |  chr    | Name of team 2 |   Team BL    |
+| Score2       |  dbl    | The total points Name2 scored in a given week |  121.3    |
+| Type       |  factor    | Regular season or Playoff game |   Regular    |
+
+: Data Dictionary for Weekly Match-up Variables
 
 
-Note: I de-identified all the data but mine to where my friends would know who they were but no one else can identify them.
+:::
 
-The code below will read in the data I obtained using python. I do some pre-proccesing to remove weeks that haven't been played yet.
+::: {.callout-note}
+Here is also a brief dictionary for common abbreviations you will see throughout this blog and in fantasy football:
+
+K = Kicker
+
+D/ST = Defense and Special Teams
+
+TE = Tight End
+
+WR = Wide Receiver
+
+RB = Running Back
+
+QB = Quarterback
+
+FLEX = Can be any position listed above
+
+:::
+
+Finally, I de-identified all the data but mine to where my friends would know who they are but no one else can identify them. This data is coming from the ESPN Fantasy Website so thank you to them for allowing us to use it @espnfantasyfootball!
+
+So now, let's go ahead and read in the data I obtained using python (on my github). I do some pre-processing to remove weeks that haven't been played yet and other columns I don't need.
 
 <!-- Read in data -->
 ```{r}
@@ -85,7 +138,9 @@ matchups = matchups[1:65,]
 # NOTE: edit WEEK based on current week
 data = data |> 
   # get rid of weeks 9-17
-  filter(!Week %in% c(9:17))
+  filter(!Week %in% c(9:17)) |> 
+  # drop playerfantasyteam
+  select(-PlayerFantasyTeam)
 
 matchups = matchups |> 
   # get rid of weeks 9-17
@@ -122,9 +177,14 @@ data|>
   labs(
     title = "Weekly Actual and Projected Scores by Team", 
     x = "Week", 
-    y = "Scores",
+    y = "Scores (# of pts)",
     caption = "Data Source: ESPN Fantasy Website",
-    subtitle = str_wrap("????", width = 90)) +
+    subtitle = str_wrap("The plot reveals several interesting trends. Notably, Team BD and Team JN consistently maintain 
+                        a steady average of projected points per week. Meanwhile, teams such as myself and Team BL have
+                        experienced a mix of both impressive and lackluster weeks. On the other hand, Team GM has had an
+                        incredible season so far, consistently delivering outstanding performances week after week.
+                        Lastly, a few teams like Team RW and Team TP have notably underperformed in multiple weeks.",
+                        width = 87)) +
   # add manual labels
   scale_linetype_manual(values = c("dashed", "solid"), labels = c("Projected", "Actual")) +
   # set y limit
@@ -195,7 +255,7 @@ ggplot(pts_against, aes(x = Week, color = TeamName)) +
     x = "Week", 
     y = "Scores",
     caption = "Data Source: ESPN Fantasy Website",
-    subtitle = str_wrap("????", width = 90)) +
+    subtitle = str_wrap("", width = 90)) +
   # set custom labels for linetype
   scale_linetype_manual(values = c("dashed", "dotted", "solid"), labels = c("Opponents Score", "Weekly Average", "Your Score")) +
   # set colors for teamnames
@@ -208,11 +268,12 @@ ggplot(pts_against, aes(x = Week, color = TeamName)) +
   theme(axis.text.x = element_text(size = 12),
   axis.text.y = element_text(size = 12),
   plot.title = element_text(face= "bold", hjust = 0.5),
-  legend.position = c(.73, -.025), legend.justification = c(1, 0))
+  legend.position = c(.73, -.055), legend.justification = c(1, 0))
 
 ```
 
 ?????
+
 
 
 
@@ -247,7 +308,12 @@ data |>
       fill = "Positions",
       title = "Total Score of Each Position For All Teams",
       caption = "Data Source: ESPN Fantasy Website",
-      subtitle = str_wrap("????", width = 90)) +
+      subtitle = str_wrap("Wide receivers (WR) and running backs (RB) consistently dominate in point scoring for each
+                          team, with the quarterback (QB) following closely behind. The FLEX position seems variable
+                          among teams which makes sense as it allows any positional player to be utilized, which is why
+                          most people have either an RB or WR in that spot. Notably, positions such as kicker (K),
+                          defense/special teams (D/ST), and tight end (TE) exhibit relatively consistent performance
+                          across all teams.", width = 89)) +
   # change theme to linedraw
   theme_linedraw() + 
   # edit text
@@ -260,7 +326,9 @@ data |>
 ```
 
 
-
+::: {.callout-warning}
+Team TP, you might want to look away for for this one...
+:::
 
 ```{r}
 # graph for worst loss differential
@@ -300,37 +368,43 @@ matchups_diff |>
     title = "Total Loss Differential For Each Team (Through Week 8)",
     fill = "Team Name",
     caption = "Data Source: ESPN Fantasy Website",
-    subtitle = str_wrap("????", width = 90)) +
+    subtitle = str_wrap("It appears that there are four distinct tiers of total loss differential observed thus far in the
+                         season. Noteworthy outliers include Team BD, whose minimal loss differential suggests consistent
+                        performance despite losing games, and Team TP, who consistently experiences significant deficits
+                        in each loss they have.", width = 90)) +
   # get rid of legend
   guides(fill = "none")
 
 ```
 
 Honestly, this plot was solely made so we could make fun of whoever has the worst Loss Differential, so sorry Team TP 😅
+Note: this is not counting how much you win, it is solely taking the weeks you lose and finding the differential between you and your opponent's team score.
+
+## Final Thoughts
 
 
-## Final Thoughts:
 
-
-
-## Functions used:
+## Functions Used
 
 <!-- At the end of the data analysis, list out each of the functions you used from each of the packages (dplyr, tidyr, and ggplot2) to help the TA with respect to making sure you met all the requirements described above. -->
 
-
-## Resources:
-
-- https://jman4190.medium.com/analyzing-your-fantasy-football-season-with-python-8c228262eae9
-
-- https://github.com/tbryan2/espnfantasyfootball
-
-- https://stmorse.github.io/journal/espn-fantasy-projections.html
-
-- https://www.espn.com/fantasy/football/
+dplyr:
 
 
-<!-- Your analysis must include a .bib file, which you use to reference at least three unique citations. For example, it could be to a website or paper from where the original data came from or it could be to a paper describing a method you are using to analyze the data. -->
+tidyr:
 
+
+ggplot2:
+
+
+## References
+
+::: {#refs}
+:::
+
+
+# TODO:
+- add keys for each position
 
 
 <!-- Extra plots not used -->

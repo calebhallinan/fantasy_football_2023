@@ -169,6 +169,8 @@ data|>
   geom_line(aes(linetype = "solid", show.legend = FALSE)) +
   # dashed line for projected total
   geom_line(aes(y = projected_weekly_score, linetype = "dashed")) +
+  # add point to easily see week
+  geom_point(aes(y=weekly_score), size=1) +
   # average projected
   # geom_hline(aes(yintercept=mean(projected_weekly_score), linetype = "dotted", color="red")) +
   # facet wrap by teamname
@@ -199,7 +201,7 @@ data|>
   theme(axis.text.x = element_text(size = 12),
   axis.text.y = element_text(size = 12),
   plot.title = element_text(face= "bold", hjust = 0.5),
-  legend.position = c(.725, 0), legend.justification = c(1, 0))
+  legend.position = c(.98, -0.12), legend.justification = c(1, 0))
 ```
 
 Well, I think I was right in thinking they aren't ideal but honestly a couple teams seem to follow it fairly well. Team BD is pretty consistent across the board so far, as with Team JN. However, there are some teams with large outlier weeks like Team GM who has had some insane weeks or Team TP who has had some not so great weeks. Overall, it is pretty interesting to see the actual points scored that week compared to the projected!
@@ -268,7 +270,7 @@ ggplot(pts_against, aes(x = Week, color = TeamName)) +
   theme(axis.text.x = element_text(size = 12),
   axis.text.y = element_text(size = 12),
   plot.title = element_text(face= "bold", hjust = 0.5),
-  legend.position = c(.73, -.055), legend.justification = c(1, 0))
+  legend.position = c(.98, -.09), legend.justification = c(1, 0))
 
 ```
 
@@ -325,6 +327,11 @@ data |>
 
 ```
 
+::: {.column-margin}
+I usually never draft a QB high, with my theory being in a 10 man league there are typically enough "average" QBs to be fine. This year, I decided to draft Joe Burrow much earlier than I usually do and it has come back to bite me in the butt because he has been pitiful. So, lesson learned and I will not be drafting QBs early anymore.
+
+![[Joe Burrow](https://www.nfl.com/players/joe-burrow/stats/career)](joe.png){width=200 style="text-align: center;"}
+:::
 
 ::: {.callout-warning}
 Team TP, you might want to look away for for this one...
@@ -352,7 +359,7 @@ matchups_diff |>
   # init plot
   ggplot(aes(x = LowerScoreName, y = sum_diff, fill = LowerScoreName)) +
   # geom bar for each team
-  geom_bar(stat = "identity", position = "dodge") +
+  geom_col(position = "dodge") +
   # add colors
   scale_fill_manual(values = paletteer_d("ggprism::colors", 12)) +
   # change to linedraw
@@ -388,13 +395,21 @@ Note: this is not counting how much you win, it is solely taking the weeks you l
 
 <!-- At the end of the data analysis, list out each of the functions you used from each of the packages (dplyr, tidyr, and ggplot2) to help the TA with respect to making sure you met all the requirements described above. -->
 
-dplyr:
+dplyr/tidyr:
 
-
-tidyr:
-
+1. filter: filter rows based on conditions
+2. select: select specific columns
+3. summarise: calculate summary statistics
+4. mutate: create or modify a column
+5. group_by: group data based on variables
+6. inner_join: merge two datasets on key values
 
 ggplot2:
+
+1. geom_line: line plot
+2. geom_point: points on line plot
+3. geom_bar: bar plot
+4. geom_col: column plot
 
 
 ## References
@@ -403,11 +418,11 @@ ggplot2:
 :::
 
 
-# TODO:
-- add keys for each position
+
 
 
 <!-- Extra plots not used -->
+
 
 ```{r, include=FALSE}
 # Cumulative points over time

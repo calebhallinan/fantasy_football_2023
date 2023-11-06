@@ -547,3 +547,22 @@ data |>
   arrange(sum_diff)
 
 ```
+
+
+
+```{r}
+
+data |> 
+  filter(PlayerRosterSlot == "Bench") |> 
+  group_by(TeamName) |> 
+  summarise(bench_points = sum(PlayerScoreActual)) |> 
+  ggplot(aes(x = TeamName, y = bench_points, fill = TeamName)) +
+  geom_col() +
+  scale_fill_manual(values = paletteer_d("ggprism::colors", 12))+
+  guides(fill = "none") +
+  labs(
+    x = "Team Name",
+    y = "Total Bench Points"
+  )
+
+```

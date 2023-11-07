@@ -21,10 +21,13 @@ league = espn.FantasyLeague(league_id=1527302859, year=2023, swid=espnsecrets.sw
 data = league.get_league_data()
 
 # save data
-data.to_csv("data/league_data_2023.csv")
+data.to_csv("/Users/calebhallinan/Desktop/fantasy/data/league_data_2023.csv")
 
 # get matchups
 matchups = league.get_matchup_data()
 # save matchups
-matchups.to_csv("data/league_matchups_2023.csv")
+matchups.to_csv("/Users/calebhallinan/Desktop/fantasy/data/league_matchups_2023.csv")
 
+
+
+data[data['Week'] == 9]

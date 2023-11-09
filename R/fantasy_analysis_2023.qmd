@@ -170,6 +170,17 @@ data|>
   geom_line(aes(y = projected_weekly_score, linetype = "dashed")) +
   # add point to easily see week
   geom_point(aes(y=weekly_score), size=1) +
+  # plot color between lines
+  # geom_ribbon(aes(ymin=projected_weekly_score,ymax=weekly_score,fill=TeamName), alpha=0.5,linetype = 0) +
+  # geom_ribbon(aes(ymin=pmin(projected_weekly_score,weekly_score), ymax=weekly_score), 
+  #             fill="green", alpha=0.5,linetype = 0) +
+  #   geom_ribbon(aes(ymin=weekly_score, ymax=pmax(projected_weekly_score, weekly_score)), 
+  #             fill="red", alpha=0.5,linetype = 0) +
+
+  # geom_ribbon(data = . %>% filter(weekly_score >= projected_weekly_score), aes(ymin=projected_weekly_score,ymax=weekly_score),fill="green", alpha=0.5,linetype = 0) +
+
+    # geom_ribbon(data = . %>% filter(weekly_score <= projected_weekly_score), aes(ymin=weekly_score,ymax=projected_weekly_score,fill="red"), alpha=0.5,linetype = 0) +
+
   # average projected
   # geom_hline(aes(yintercept=mean(projected_weekly_score), linetype = "dotted", color="red")) +
   # facet wrap by teamname
@@ -192,8 +203,10 @@ data|>
   ylim(50, 180) +
   # set colors for teams
   scale_colour_manual(values = paletteer_d("ggprism::colors", 12)) +
+  # set fill for teams
+  # scale_fill_manual(values = paletteer_d("ggprism::colors", 12)) +
   # get rid of color legend but use linetype legend
-  guides(color = "none", linetype = guide_legend(title = "Scores")) +
+  guides(color = "none", fill = "none", linetype = guide_legend(title = "Scores")) +
   # use classic theme
   theme_classic() +
   # edit text and legend
@@ -277,7 +290,7 @@ ggplot(pts_against, aes(x = Week, color = TeamName)) +
 
 ```
 
-We see two teams, Team BD and JN, are both pretty "average" teams. However, what's interesting about that is they are currently at the top of the league in wins (Through Week 8) therefore implying consistency may be the best in winning fantasy football. Team RW has fairly low scoring weeks, besides their one breakout week 5 against Team TP. Interestingly, Team TP started off strong but had a tough middle of the season and unlucky past two weeks getting just barely beat by their opponent.
+We see two teams, Team BD and JN, are both pretty "average" teams. However, what's interesting about that is they are currently at the top of the league in wins (Through Week 9) therefore implying consistency may be the best in winning fantasy football. Team RW has fairly low scoring weeks, besides their one breakout week 5 against Team TP. Interestingly, Team TP started off strong but had a tough middle of the season and unlucky past two weeks getting just barely beat by their opponent.
 
 A lot of these trends can be explained more by BYE weeks (weeks that a NFL team has off), injuries, or injuries that affect other players (for example, QB Matt Stafford was out Week 9 and so WR Puka Nacua didn't even score 5 points when he was projected 12). I think that is certainly the case for Team TP who has had a tough go at injuries this season. I personally have had a decent amount, like the number one overall pick Justin Jefferson being on IR and missing the past 4 weeks (note the drop in my score four weeks ago) 🙃. 
 
@@ -438,6 +451,41 @@ ggplot2:
 
 
 <!-- Extra plots not used -->
+
+```{r}
+# violinplot of scores for all players and teams
+
+data |> 
+  # filter(TeamName == "Team Caleb") |> 
+  filter(!PlayerRosterSlot %in% c("Bench", "IR")) |> 
+  group_by(TeamName) |> 
+  ggplot(aes(x = TeamName, y = PlayerScoreActual, fill = TeamName)) +
+  geom_violin(draw_quantiles = c(0.5), color = "white") + 
+   # add colors
+  scale_fill_manual(values = paletteer_d("ggprism::colors", 12)) +
+  # change to linedraw
+  theme_linedraw() + 
+  # add theme
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+    text = element_text(size = 12),
+    plot.title = element_text(face = "bold", hjust = 0.5)) +
+  # add labels
+  labs(
+    x = "Team Name",
+    y = "Player's Scores (All Weeks)",
+    title = "Distribution of Player Scores for Each Team (Through Week 9)",
+    fill = "Team Name",
+    caption = "Data Source: ESPN Fantasy Website",
+    subtitle = str_wrap("The violin plots display the distribution of all player scores for each team. The white line
+                        within each plot represents the median score for that team. Notably, Team DH and Team RW have
+                        had the best weeks by a player so far this season, while Team WR has had the lowest scores. 
+                        Most teams exhibit a similar median score, however, Team GM stands out with a noticeably 
+                        higher median compared to other teams.", width = 87)) +
+  # get rid of legend
+  guides(fill = "none", color = "none")
+
+```
+
 
 
 ```{r, include=FALSE}

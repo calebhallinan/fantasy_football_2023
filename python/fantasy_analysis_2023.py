@@ -30,4 +30,4 @@ matchups.to_csv("/Users/calebhallinan/Desktop/fantasy/data/league_matchups_2023.
 
 
 
-data[data['Week'] == 9]
+data[data['Week'] == 14]
